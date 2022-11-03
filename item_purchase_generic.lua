@@ -1,4 +1,24 @@
 
+local bot = GetBot()
+local courier = bot.theCourier
+
+local currentItemToPurchase
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -10,14 +30,17 @@ local itemPurchaseListSkeletonKing = {
     "item_travel_boots_2", "item_moon_shard"
 }
 
-
-
-
-
-function GetNextItemToPurchaseFromItemList(itemList_stringList)
-    for indexOfTheBigItemInItemList, bigItemName in ipairs(itemList_stringList) do
-		
+function GetTheSmallestComponentListOfABigItem(bigItemName)
+    local componentList = {}
+    local directComponentStringList = GetItemComponents(bigItemName)
+    if #directComponentStringList == 0 then
+        table.insert(componentList, bigItemName)
+	else
+		for directComponentStringListIndex, directComponentName in ipairs(directComponentStringList) do
+			table.insert(componentList, GetTheSmallestComponentListOfABigItem(directComponentName))
+		end
     end
+	return componentList
 end
 
 
@@ -25,7 +48,67 @@ end
 
 
 
+function GetTheDirectComponentListOfABigItem(bigItemName)
+	local componentList = {}
+	local directComponentStringList = GetItemComponents(bigItemName)
+	if #directComponentStringList == 0 then
+		table.insert(componentList, bigItemName)
+	else
+		table.insert(componentList, directComponentStringList)
+	end
+	return componentList
+end
+
+
+
+
+function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck)
+	
+
+	if itemNameToCheck == 'item_ultimate_scepter' and bot:HasScepter() then return true end
+	
+	if itemNameToCheck == 'item_moon_shard' and bot:HasModifier( "modifier_item_moon_shard_consumed" ) then return true end
+
+	if itemNameToCheck == 'item_ultimate_scepter_2' then return ( bot:HasScepter() and bot:FindItemSlot('item_ultimate_scepter') < 0 ) end
+
+	local foundItemSlotOnBot = bot:FindItemSlot( itemNameToCheck )
+
+	local foundItemSlotOnCourier = courier:FindItemSlot(itemNameToCheck)
+
+	if foundItemSlotOnBot >= 0 and ( foundItemSlotOnBot <= 14) then
+		return true
+	end
+
+	if foundItemSlotOnCourier >= 0 and ( foundItemSlotOnBot <= 8) then
+		return true
+	end
+
+	return false
+	
+end
+
+
+
+
+
+function PurchaseItem(itemPurchaseList)
+	
+	for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(itemPurchaseList) do
+		local currentItemDirectComponents = GetTheDirectComponentListOfABigItem(currentItemInItemPurchaseList)
+		for currentItemDirectComponentsIndex, currentItemDirectComponent in ipairs(currentItemDirectComponents) do
+			currentItemToPurchase = currentItemDirectComponent
+			if CheckIfTheBotAlreadyHasThisItem(bot, courier, currentItemDirectComponent) then goto continue
+				
+				
+			end
+			::continue::
+		end
+	end
+end
+
+
 
 
 -- Implement ItemPurchaseThink() to override decisionmaking around item purchasing.
-function ItemPurchaseThink() return end
+function ItemPurchaseThink()
+end
