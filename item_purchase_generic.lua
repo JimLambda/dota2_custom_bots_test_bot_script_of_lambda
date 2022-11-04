@@ -1,8 +1,8 @@
 local bot = GetBot()
-local courier = bot.theCourier
+local courier = nil
 
 local currentItemToPurchase
-local itemPurchaseThinkMoment = 0
+local itemPurchaseThinkMoment = -90
 
 -- Item purchase lists for npc_dota_hero_skeleton_king.
 local itemPurchaseListSkeletonKing = {
@@ -75,6 +75,7 @@ function PurchaseItem(itemPurchaseList)
                         GetItemCost(currentItemInItemPurchaseList) then
                         return
                     else
+						print("Purchasing item!!!!!!"..currentItemInItemPurchaseList)
                         bot:ActionImmediate_PurchaseItem(
                             currentItemInItemPurchaseList)
                     end
@@ -91,6 +92,9 @@ function ItemPurchaseThink()
     if DotaTime() < itemPurchaseThinkMoment then
         return
     else
+		if courier == nil then
+			courier = GetCourier(bot:GetPlayerID())
+		end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
     end
