@@ -65,12 +65,32 @@ end
 function PurchaseItem(itemPurchaseList)
     for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
                                                                     itemPurchaseList) do
-        local currentItemDirectComponents =
-            GetTheDirectComponentListOfABigItem(currentItemInItemPurchaseList)
-        for currentItemDirectComponentsIndex, currentItemDirectComponent in
-            ipairs(currentItemDirectComponents) do
-            currentItemToPurchase = currentItemDirectComponent
-        end
+        repeat
+            if next(GetItemComponents(currentItemInItemPurchaseList)) == nil then
+                if CheckIfTheBotAlreadyHasThisItem(bot, courier,
+                                                   currentItemInItemPurchaseList) then
+                    do break end
+                else
+                    if bot:GetGold() <
+                        GetItemCost(currentItemInItemPurchaseList) then
+                        return
+                    else
+                        bot:ActionImmediate_PurchaseItem(
+                            currentItemInItemPurchaseList)
+                    end
+                end
+            else
+                PurchaseItem(GetItemComponents(currentItemInItemPurchaseList))
+            end
+
+            -- local currentItemDirectComponents =
+            --     GetTheDirectComponentListOfABigItem(
+            --         currentItemInItemPurchaseList)
+            -- for currentItemDirectComponentsIndex, currentItemDirectComponent in
+            --     ipairs(currentItemDirectComponents) do
+            --     currentItemToPurchase = currentItemDirectComponent
+            -- end
+        until true
     end
 end
 
