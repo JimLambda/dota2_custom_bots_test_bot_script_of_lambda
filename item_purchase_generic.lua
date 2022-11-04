@@ -82,14 +82,6 @@ function PurchaseItem(itemPurchaseList)
             else
                 PurchaseItem(GetItemComponents(currentItemInItemPurchaseList))
             end
-
-            -- local currentItemDirectComponents =
-            --     GetTheDirectComponentListOfABigItem(
-            --         currentItemInItemPurchaseList)
-            -- for currentItemDirectComponentsIndex, currentItemDirectComponent in
-            --     ipairs(currentItemDirectComponents) do
-            --     currentItemToPurchase = currentItemDirectComponent
-            -- end
         until true
     end
 end
