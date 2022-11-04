@@ -1,26 +1,8 @@
-
 local bot = GetBot()
 local courier = bot.theCourier
 
 local currentItemToPurchase
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+local itemPurchaseThinkMoment = 0
 
 -- Item purchase lists for npc_dota_hero_skeleton_king.
 local itemPurchaseListSkeletonKing = {
@@ -35,80 +17,69 @@ function GetTheSmallestComponentListOfABigItem(bigItemName)
     local directComponentStringList = GetItemComponents(bigItemName)
     if #directComponentStringList == 0 then
         table.insert(componentList, bigItemName)
-	else
-		for directComponentStringListIndex, directComponentName in ipairs(directComponentStringList) do
-			table.insert(componentList, GetTheSmallestComponentListOfABigItem(directComponentName))
-		end
+    else
+        for directComponentStringListIndex, directComponentName in ipairs(
+                                                                       directComponentStringList) do
+            table.insert(componentList, GetTheSmallestComponentListOfABigItem(
+                             directComponentName))
+        end
     end
-	return componentList
+    return componentList
 end
-
-
-
-
-
 
 function GetTheDirectComponentListOfABigItem(bigItemName)
-	local componentList = {}
-	local directComponentStringList = GetItemComponents(bigItemName)
-	if #directComponentStringList == 0 then
-		table.insert(componentList, bigItemName)
-	else
-		table.insert(componentList, directComponentStringList)
-	end
-	return componentList
+    local componentList = {}
+    local directComponentStringList = GetItemComponents(bigItemName)
+    if #directComponentStringList == 0 then
+        table.insert(componentList, bigItemName)
+    else
+        table.insert(componentList, directComponentStringList)
+    end
+    return componentList
 end
-
-
-
 
 function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck)
-	
+    if itemNameToCheck == 'item_ultimate_scepter' and bot:HasScepter() then
+        return true
+    end
+    if itemNameToCheck == 'item_moon_shard' and
+        bot:HasModifier("modifier_item_moon_shard_consumed") then return true end
+    if itemNameToCheck == 'item_ultimate_scepter_2' then
+        return (bot:HasScepter() and bot:FindItemSlot('item_ultimate_scepter') <
+                   0)
+    end
 
-	if itemNameToCheck == 'item_ultimate_scepter' and bot:HasScepter() then return true end
-	
-	if itemNameToCheck == 'item_moon_shard' and bot:HasModifier( "modifier_item_moon_shard_consumed" ) then return true end
+    local foundItemSlotOnBot = bot:FindItemSlot(itemNameToCheck)
+    local foundItemSlotOnCourier = courier:FindItemSlot(itemNameToCheck)
 
-	if itemNameToCheck == 'item_ultimate_scepter_2' then return ( bot:HasScepter() and bot:FindItemSlot('item_ultimate_scepter') < 0 ) end
+    if foundItemSlotOnBot >= 0 and (foundItemSlotOnBot <= 14) then
+        return true
+    end
+    if foundItemSlotOnCourier >= 0 and (foundItemSlotOnBot <= 8) then
+        return true
+    end
 
-	local foundItemSlotOnBot = bot:FindItemSlot( itemNameToCheck )
-
-	local foundItemSlotOnCourier = courier:FindItemSlot(itemNameToCheck)
-
-	if foundItemSlotOnBot >= 0 and ( foundItemSlotOnBot <= 14) then
-		return true
-	end
-
-	if foundItemSlotOnCourier >= 0 and ( foundItemSlotOnBot <= 8) then
-		return true
-	end
-
-	return false
-	
+    return false
 end
-
-
-
-
 
 function PurchaseItem(itemPurchaseList)
-	
-	for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(itemPurchaseList) do
-		local currentItemDirectComponents = GetTheDirectComponentListOfABigItem(currentItemInItemPurchaseList)
-		for currentItemDirectComponentsIndex, currentItemDirectComponent in ipairs(currentItemDirectComponents) do
-			currentItemToPurchase = currentItemDirectComponent
-			if CheckIfTheBotAlreadyHasThisItem(bot, courier, currentItemDirectComponent) then goto continue
-				
-				
-			end
-			::continue::
-		end
-	end
+    for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
+                                                                    itemPurchaseList) do
+        local currentItemDirectComponents =
+            GetTheDirectComponentListOfABigItem(currentItemInItemPurchaseList)
+        for currentItemDirectComponentsIndex, currentItemDirectComponent in
+            ipairs(currentItemDirectComponents) do
+            currentItemToPurchase = currentItemDirectComponent
+        end
+    end
 end
-
-
-
 
 -- Implement ItemPurchaseThink() to override decisionmaking around item purchasing.
 function ItemPurchaseThink()
+    if DotaTime() < itemPurchaseThinkMoment then
+        return
+    else
+        itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
+        PurchaseItem(itemPurchaseListSkeletonKing)
+    end
 end
