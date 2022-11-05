@@ -118,7 +118,6 @@ function PurchaseItem(itemPurchaseList)
                                                    currentItemInItemPurchaseList) then
                     do break end
                 else
-
                     local itemCost = GetItemCost(currentItemInItemPurchaseList)
                     if bot:GetGold() < itemCost then
                         return
@@ -142,9 +141,8 @@ function PurchaseItem(itemPurchaseList)
                                             currentItemInItemPurchaseList)
                                         return
                                     else
-                                        courier:Action_MoveToLocation(
-                                            GetPreferedSecretShopLocation() +
-                                                RandomVector(20))
+                                        bot:ActionImmediate_Courier(courier,
+                                                                    COURIER_ACTION_SECRET_SHOP)
                                         return
                                     end
                                 else
