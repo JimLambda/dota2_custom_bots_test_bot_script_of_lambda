@@ -1,3 +1,5 @@
+-- TODO Double item handling.
+-- TODO Sell scepter or scepter components after having roshan scepter.
 local bot = GetBot()
 local courier = nil
 
@@ -84,7 +86,8 @@ function GetTheDirectComponentListOfABigItem(bigItemName)
     return componentList
 end
 
-function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck)
+function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
+                                         isItDoubleItem)
     if itemNameToCheck == 'item_ultimate_scepter' and bot:HasScepter() then
         return true
     end
@@ -182,6 +185,7 @@ function PurchaseItem(itemPurchaseList)
                                       currentItemNameInItemPurchaseList .. ".")
                             bot:ActionImmediate_PurchaseItem(
                                 currentItemNameInItemPurchaseList)
+
                             return
                         end
                     end
@@ -203,5 +207,6 @@ function ItemPurchaseThink()
         if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
+        for i = 0, 16, 1 do print(bot:GetItemInSlot(i):GetName()) end
     end
 end
