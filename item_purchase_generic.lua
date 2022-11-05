@@ -1,5 +1,6 @@
 local bot = GetBot()
 local courier = nil
+if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
 
 local RAD_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET)
 local DIRE_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET2)
