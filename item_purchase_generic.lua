@@ -150,8 +150,12 @@ function PurchaseItem(itemPurchaseList)
                                                 "'s courier purchasing: " ..
                                                 currentItemInItemPurchaseList ..
                                                 ".")
-                                        courier:ActionImmediate_PurchaseItem(
-                                            currentItemInItemPurchaseList)
+                                        if courier:ActionImmediate_PurchaseItem(
+                                            currentItemInItemPurchaseList) ==
+                                            PURCHASE_ITEM_SUCCESS then
+                                            bot:ActionImmediate_Courier(courier,
+                                                                        COURIER_ACTION_TRANSFER_ITEMS)
+                                        end
                                         return
                                     else
                                         print(
@@ -170,9 +174,9 @@ function PurchaseItem(itemPurchaseList)
                                 end
                             end
                         else
-                            print(
-                                "Bot purchasing item from base, purchasing: " ..
-                                    currentItemInItemPurchaseList .. ".")
+                            print("Bot purchasing item from base, bot " ..
+                                      bot:GetPlayerID() .. " purchasing: " ..
+                                      currentItemInItemPurchaseList .. ".")
                             bot:ActionImmediate_PurchaseItem(
                                 currentItemInItemPurchaseList)
                             return
