@@ -246,6 +246,5 @@ function ItemPurchaseThink()
         if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
-        -- for i = 0, 16, 1 do print(bot:GetItemInSlot(i):GetName()) end
     end
 end
