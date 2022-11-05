@@ -1,11 +1,14 @@
 local bot = GetBot()
 local courier = nil
 
+local RAD_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET)
+local DIRE_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET2)
+
 local currentItemToPurchase
 local itemPurchaseThinkMoment = -90
 
--- I copied this tpring method from stackoverflow, it's used to print the contents of a table(/list).
-function tprint(tbl, indent)
+-- I copied this TablePrint method from stackoverflow, it's used to print the contents of a table(/list). url: https://stackoverflow.com/questions/41942289/display-contents-of-tables-in-lua
+function TablePrint(tbl, indent)
     if not indent then indent = 0 end
     local toprint = string.rep(" ", indent) .. "{\r\n"
     indent = indent + 2
@@ -21,13 +24,30 @@ function tprint(tbl, indent)
         elseif (type(v) == "string") then
             toprint = toprint .. "\"" .. v .. "\",\r\n"
         elseif (type(v) == "table") then
-            toprint = toprint .. tprint(v, indent + 2) .. ",\r\n"
+            toprint = toprint .. TablePrint(v, indent + 2) .. ",\r\n"
         else
             toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
         end
     end
     toprint = toprint .. string.rep(" ", indent - 2) .. "}"
     return toprint
+end
+
+function GetPreferedSecretShopLocation()
+    if GetTeam() == TEAM_RADIANT then
+        if GetUnitToLocationDistance(bot, DIRE_SECRET_SHOP) <= 3800 then
+            return DIRE_SECRET_SHOP;
+        else
+            return RAD_SECRET_SHOP;
+        end
+    elseif GetTeam() == TEAM_DIRE then
+        if GetUnitToLocationDistance(bot, RAD_SECRET_SHOP) <= 3800 then
+            return RAD_SECRET_SHOP;
+        else
+            return DIRE_SECRET_SHOP;
+        end
+    end
+    return nil;
 end
 
 -- Item purchase lists for npc_dota_hero_skeleton_king.
@@ -92,28 +112,57 @@ function PurchaseItem(itemPurchaseList)
     for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
                                                                     itemPurchaseList) do
         repeat
-			-- print(tprint(GetItemComponents("item_sphere")))
-            -- print(currentItemInItemPurchaseList)
-            -- print(type(currentItemInItemPurchaseList))
             if next(GetItemComponents(currentItemInItemPurchaseList)) == nil then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
                                                    currentItemInItemPurchaseList) then
                     do break end
                 else
-					local itemCost = GetItemCost(currentItemInItemPurchaseList)
-                    if bot:GetGold() <
-					itemCost or (bot:GetGold() >= itemCost ) then
+
+                    local itemCost = GetItemCost(currentItemInItemPurchaseList)
+                    if bot:GetGold() < itemCost then
                         return
                     else
-                        print("Purchasing item!!!!!!" ..
-                                  currentItemInItemPurchaseList)
-                        bot:ActionImmediate_PurchaseItem(
-                            currentItemInItemPurchaseList)
+                        if IsItemPurchasedFromSecretShop(
+                            currentItemInItemPurchaseList) then
+                            if bot:DistanceFromSecretShop() == 0 then
+                                bot:ActionImmediate_PurchaseItem(
+                                    currentItemInItemPurchaseList)
+                                return
+                            elseif bot:DistanceFromSecretShop() <= 500 then
+                                bot:Action_MoveToLocation(
+                                    GetPreferedSecretShopLocation() +
+                                        RandomVector(20))
+                                return
+                            else
+                                if GetCourierState(courier) ~=
+                                    COURIER_STATE_DEAD then
+                                    if courier:DistanceFromSecretShop() == 0 then
+                                        courier:ActionImmediate_PurchaseItem(
+                                            currentItemInItemPurchaseList)
+                                        return
+                                    else
+                                        courier:Action_MoveToLocation(
+                                            GetPreferedSecretShopLocation() +
+                                                RandomVector(20))
+                                        return
+                                    end
+                                else
+                                    bot:Action_MoveToLocation(
+                                        GetPreferedSecretShopLocation() +
+                                            RandomVector(20))
+                                    return
+                                end
+                            end
+                        else
+                            print("Purchasing item!!!!!! Purchasing: " ..
+                                      currentItemInItemPurchaseList)
+                            bot:ActionImmediate_PurchaseItem(
+                                currentItemInItemPurchaseList)
+                            return
+                        end
                     end
                 end
             else
-                -- print(GetItemComponents(currentItemInItemPurchaseList))
-                -- print(type(GetItemComponents(currentItemInItemPurchaseList)))
                 PurchaseItem(GetItemComponents(currentItemInItemPurchaseList)[1])
             end
         until true
