@@ -92,16 +92,17 @@ function PurchaseItem(itemPurchaseList)
     for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
                                                                     itemPurchaseList) do
         repeat
-			print(tprint(GetItemComponents("item_sphere")))
-            print(currentItemInItemPurchaseList)
-            print(type(currentItemInItemPurchaseList))
+			-- print(tprint(GetItemComponents("item_sphere")))
+            -- print(currentItemInItemPurchaseList)
+            -- print(type(currentItemInItemPurchaseList))
             if next(GetItemComponents(currentItemInItemPurchaseList)) == nil then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
                                                    currentItemInItemPurchaseList) then
                     do break end
                 else
+					local itemCost = GetItemCost(currentItemInItemPurchaseList)
                     if bot:GetGold() <
-                        GetItemCost(currentItemInItemPurchaseList) then
+					itemCost or (bot:GetGold() >= itemCost ) then
                         return
                     else
                         print("Purchasing item!!!!!!" ..
@@ -111,9 +112,9 @@ function PurchaseItem(itemPurchaseList)
                     end
                 end
             else
-                print(GetItemComponents(currentItemInItemPurchaseList))
-                print(type(GetItemComponents(currentItemInItemPurchaseList)))
-                PurchaseItem(GetItemComponents(currentItemInItemPurchaseList))
+                -- print(GetItemComponents(currentItemInItemPurchaseList))
+                -- print(type(GetItemComponents(currentItemInItemPurchaseList)))
+                PurchaseItem(GetItemComponents(currentItemInItemPurchaseList)[1])
             end
         until true
     end
