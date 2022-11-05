@@ -1,6 +1,5 @@
 local bot = GetBot()
-local courier = GetCourier(bot:GetPlayerID())
-if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
+local courier = nil
 
 local RAD_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET)
 local DIRE_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET2)
@@ -110,27 +109,31 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck)
 end
 
 function PurchaseItem(itemPurchaseList)
-    for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
-                                                                    itemPurchaseList) do
+    for currentItemIndexInItemPurchaseList, currentItemNameInItemPurchaseList in
+        ipairs(itemPurchaseList) do
         repeat
-            if #GetItemComponents(currentItemInItemPurchaseList) == 0 then
+            if CheckIfTheBotAlreadyHasThisItem(bot, courier,
+                                               currentItemNameInItemPurchaseList) then
+                do break end
+            elseif #GetItemComponents(currentItemNameInItemPurchaseList) == 0 then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
-                                                   currentItemInItemPurchaseList) then
+                                                   currentItemNameInItemPurchaseList) then
                     do break end
                 else
-                    local itemCost = GetItemCost(currentItemInItemPurchaseList)
+                    local itemCost = GetItemCost(
+                                         currentItemNameInItemPurchaseList)
                     if bot:GetGold() < itemCost then
                         return
                     else
                         if IsItemPurchasedFromSecretShop(
-                            currentItemInItemPurchaseList) then
+                            currentItemNameInItemPurchaseList) then
                             if bot:DistanceFromSecretShop() == 0 then
                                 print(
                                     "Bot purchasing item from secret shop, bot " ..
                                         bot:GetPlayerID() .. " purchasing: " ..
-                                        currentItemInItemPurchaseList .. ".")
+                                        currentItemNameInItemPurchaseList .. ".")
                                 bot:ActionImmediate_PurchaseItem(
-                                    currentItemInItemPurchaseList)
+                                    currentItemNameInItemPurchaseList)
                                 return
                             elseif bot:DistanceFromSecretShop() <= 500 then
                                 print("Bot moving to secret shop, bot " ..
@@ -148,10 +151,10 @@ function PurchaseItem(itemPurchaseList)
                                             "Courier purchasing item from secret shop, bot " ..
                                                 bot:GetPlayerID() ..
                                                 "'s courier purchasing: " ..
-                                                currentItemInItemPurchaseList ..
+                                                currentItemNameInItemPurchaseList ..
                                                 ".")
                                         if courier:ActionImmediate_PurchaseItem(
-                                            currentItemInItemPurchaseList) ==
+                                            currentItemNameInItemPurchaseList) ==
                                             PURCHASE_ITEM_SUCCESS then
                                             bot:ActionImmediate_Courier(courier,
                                                                         COURIER_ACTION_TRANSFER_ITEMS)
@@ -176,15 +179,16 @@ function PurchaseItem(itemPurchaseList)
                         else
                             print("Bot purchasing item from base, bot " ..
                                       bot:GetPlayerID() .. " purchasing: " ..
-                                      currentItemInItemPurchaseList .. ".")
+                                      currentItemNameInItemPurchaseList .. ".")
                             bot:ActionImmediate_PurchaseItem(
-                                currentItemInItemPurchaseList)
+                                currentItemNameInItemPurchaseList)
                             return
                         end
                     end
                 end
             else
-                PurchaseItem(GetItemComponents(currentItemInItemPurchaseList)[1])
+                PurchaseItem(
+                    GetItemComponents(currentItemNameInItemPurchaseList)[1])
                 return
             end
         until true
