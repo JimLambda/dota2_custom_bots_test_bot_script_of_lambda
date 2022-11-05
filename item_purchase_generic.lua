@@ -88,6 +88,8 @@ end
 
 function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
                                          isItDoubleItem)
+    if isItDoubleItem == nil then isItDoubleItem = false end
+
     if itemNameToCheck == 'item_ultimate_scepter' and bot:HasScepter() then
         return true
     end
@@ -96,6 +98,33 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
     if itemNameToCheck == 'item_ultimate_scepter_2' then
         return (bot:HasScepter() and bot:FindItemSlot('item_ultimate_scepter') <
                    0)
+    end
+
+    if isItDoubleItem == true then
+        local tableOfAllItemsTheBotHas = {}
+        local tableOfTheItemToCheckThatTheBotHas = {}
+        for i = 0, 16, 1 do
+            local itemName = bot:GetItemInSlot(i):GetName()
+            if itemName then
+                table.insert(tableOfAllItemsTheBotHas, itemName)
+            end
+        end
+        for i = 0, 8, 1 do
+            local itemName = courier:GetItemInSlot(i):GetName()
+            if itemName then
+                table.insert(tableOfAllItemsTheBotHas, itemName)
+            end
+        end
+        for itemIndex, itemName in ipairs(tableOfAllItemsTheBotHas) do
+            if itemName == itemNameToCheck then
+                table.insert(tableOfTheItemToCheckThatTheBotHas, itemName)
+            end
+        end
+        if #tableOfTheItemToCheckThatTheBotHas >= 2 then
+            return true
+        else
+            return false
+        end
     end
 
     local foundItemSlotOnBot = bot:FindItemSlot(itemNameToCheck)
@@ -112,15 +141,25 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
 end
 
 function PurchaseItem(itemPurchaseList)
+    local isItDoubleItemFlag = false
     for currentItemIndexInItemPurchaseList, currentItemNameInItemPurchaseList in
         ipairs(itemPurchaseList) do
         repeat
+            if currentItemIndexInItemPurchaseList >= 2 then
+                if itemPurchaseList[currentItemIndexInItemPurchaseList - 1] ==
+                    currentItemNameInItemPurchaseList then
+                    isItDoubleItemFlag = true
+                end
+            end
+
             if CheckIfTheBotAlreadyHasThisItem(bot, courier,
-                                               currentItemNameInItemPurchaseList) then
+                                               currentItemNameInItemPurchaseList,
+                                               isItDoubleItemFlag) then
                 do break end
             elseif #GetItemComponents(currentItemNameInItemPurchaseList) == 0 then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
-                                                   currentItemNameInItemPurchaseList) then
+                                                   currentItemNameInItemPurchaseList,
+                                                   isItDoubleItemFlag) then
                     do break end
                 else
                     local itemCost = GetItemCost(
@@ -207,6 +246,6 @@ function ItemPurchaseThink()
         if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
-        for i = 0, 16, 1 do print(bot:GetItemInSlot(i):GetName()) end
+        -- for i = 0, 16, 1 do print(bot:GetItemInSlot(i):GetName()) end
     end
 end
