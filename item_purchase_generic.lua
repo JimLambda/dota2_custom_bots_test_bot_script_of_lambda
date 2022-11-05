@@ -4,6 +4,32 @@ local courier = nil
 local currentItemToPurchase
 local itemPurchaseThinkMoment = -90
 
+-- I copied this tpring method from stackoverflow, it's used to print the contents of a table(/list).
+function tprint(tbl, indent)
+    if not indent then indent = 0 end
+    local toprint = string.rep(" ", indent) .. "{\r\n"
+    indent = indent + 2
+    for k, v in pairs(tbl) do
+        toprint = toprint .. string.rep(" ", indent)
+        if (type(k) == "number") then
+            toprint = toprint .. "[" .. k .. "] = "
+        elseif (type(k) == "string") then
+            toprint = toprint .. k .. "= "
+        end
+        if (type(v) == "number") then
+            toprint = toprint .. v .. ",\r\n"
+        elseif (type(v) == "string") then
+            toprint = toprint .. "\"" .. v .. "\",\r\n"
+        elseif (type(v) == "table") then
+            toprint = toprint .. tprint(v, indent + 2) .. ",\r\n"
+        else
+            toprint = toprint .. "\"" .. tostring(v) .. "\",\r\n"
+        end
+    end
+    toprint = toprint .. string.rep(" ", indent - 2) .. "}"
+    return toprint
+end
+
 -- Item purchase lists for npc_dota_hero_skeleton_king.
 local itemPurchaseListSkeletonKing = {
     "item_boots", "item_crimson_guard", "item_assault", "item_heart",
@@ -66,6 +92,9 @@ function PurchaseItem(itemPurchaseList)
     for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
                                                                     itemPurchaseList) do
         repeat
+			print(tprint(GetItemComponents("item_sphere")))
+            print(currentItemInItemPurchaseList)
+            print(type(currentItemInItemPurchaseList))
             if next(GetItemComponents(currentItemInItemPurchaseList)) == nil then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
                                                    currentItemInItemPurchaseList) then
@@ -75,12 +104,15 @@ function PurchaseItem(itemPurchaseList)
                         GetItemCost(currentItemInItemPurchaseList) then
                         return
                     else
-						print("Purchasing item!!!!!!"..currentItemInItemPurchaseList)
+                        print("Purchasing item!!!!!!" ..
+                                  currentItemInItemPurchaseList)
                         bot:ActionImmediate_PurchaseItem(
                             currentItemInItemPurchaseList)
                     end
                 end
             else
+                print(GetItemComponents(currentItemInItemPurchaseList))
+                print(type(GetItemComponents(currentItemInItemPurchaseList)))
                 PurchaseItem(GetItemComponents(currentItemInItemPurchaseList))
             end
         until true
@@ -92,9 +124,7 @@ function ItemPurchaseThink()
     if DotaTime() < itemPurchaseThinkMoment then
         return
     else
-		if courier == nil then
-			courier = GetCourier(bot:GetPlayerID())
-		end
+        if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
     end
