@@ -113,7 +113,7 @@ function PurchaseItem(itemPurchaseList)
     for itemPurchaseListIndex, currentItemInItemPurchaseList in ipairs(
                                                                     itemPurchaseList) do
         repeat
-            if next(GetItemComponents(currentItemInItemPurchaseList)) == nil then
+            if #GetItemComponents(currentItemInItemPurchaseList) == 0 then
                 if CheckIfTheBotAlreadyHasThisItem(bot, courier,
                                                    currentItemInItemPurchaseList) then
                     do break end
@@ -125,10 +125,17 @@ function PurchaseItem(itemPurchaseList)
                         if IsItemPurchasedFromSecretShop(
                             currentItemInItemPurchaseList) then
                             if bot:DistanceFromSecretShop() == 0 then
+                                print(
+                                    "Bot purchasing item from secret shop, bot " ..
+                                        bot:GetPlayerID() .. " purchasing: " ..
+                                        currentItemInItemPurchaseList .. ".")
                                 bot:ActionImmediate_PurchaseItem(
                                     currentItemInItemPurchaseList)
                                 return
                             elseif bot:DistanceFromSecretShop() <= 500 then
+                                print("Bot moving to secret shop, bot " ..
+                                          bot:GetPlayerID() ..
+                                          " moving to secret shop.")
                                 bot:Action_MoveToLocation(
                                     GetPreferedSecretShopLocation() +
                                         RandomVector(20))
@@ -137,10 +144,20 @@ function PurchaseItem(itemPurchaseList)
                                 if GetCourierState(courier) ~=
                                     COURIER_STATE_DEAD then
                                     if courier:DistanceFromSecretShop() == 0 then
+                                        print(
+                                            "Courier purchasing item from secret shop, bot " ..
+                                                bot:GetPlayerID() ..
+                                                "'s courier purchasing: " ..
+                                                currentItemInItemPurchaseList ..
+                                                ".")
                                         courier:ActionImmediate_PurchaseItem(
                                             currentItemInItemPurchaseList)
                                         return
                                     else
+                                        print(
+                                            "Courier moving to secret shop, bot " ..
+                                                bot:GetPlayerID() ..
+                                                "'s courier moving to secret shop.")
                                         bot:ActionImmediate_Courier(courier,
                                                                     COURIER_ACTION_SECRET_SHOP)
                                         return
@@ -153,8 +170,9 @@ function PurchaseItem(itemPurchaseList)
                                 end
                             end
                         else
-                            print("Purchasing item!!!!!! Purchasing: " ..
-                                      currentItemInItemPurchaseList)
+                            print(
+                                "Bot purchasing item from base, purchasing: " ..
+                                    currentItemInItemPurchaseList .. ".")
                             bot:ActionImmediate_PurchaseItem(
                                 currentItemInItemPurchaseList)
                             return
@@ -163,6 +181,7 @@ function PurchaseItem(itemPurchaseList)
                 end
             else
                 PurchaseItem(GetItemComponents(currentItemInItemPurchaseList)[1])
+                return
             end
         until true
     end
