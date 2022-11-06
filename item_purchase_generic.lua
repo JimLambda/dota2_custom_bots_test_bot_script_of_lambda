@@ -248,28 +248,23 @@ end
 
 -- Implement ItemPurchaseThink() to override decisionmaking around item purchasing.
 function ItemPurchaseThink()
-    if DotaTime() >= sellGarbageItemThinkMoment then
-        sellGarbageItemThinkMoment = sellGarbageItemThinkMoment + 0.1
-        for slotNumber = 9, 14, 1 do
-            if bot:GetItemInSlot(slotNumber) then
-                print(
-                    "Bot selling item from stack, bot " .. bot:GetPlayerID() ..
-                        " selling.")
-                bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
-            end
-        end
-        for slotNumber = 0, 14, 1 do
-            if bot:GetItemInSlot(slotNumber) then
-                if bot:GetItemInSlot(slotNumber):GetName() == "item_tango" or
-                    bot:GetItemInSlot(slotNumber):GetName() ==
-                    "item_ironwood_tree" then
-                    print("Bot selling junk item, bot " .. bot:GetPlayerID() ..
-                              " selling.")
-                    bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
-                end
-            end
-        end
-    end
+    -- for slotNumber = 9, 14, 1 do
+    --     if bot:GetItemInSlot(slotNumber) then
+    --         print("Bot selling item from stack, bot " .. bot:GetPlayerID() ..
+    --                   " selling.")
+    --         bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
+    --     end
+    -- end
+    -- for slotNumber = 0, 14, 1 do
+    --     if bot:GetItemInSlot(slotNumber) then
+    --         if bot:GetItemInSlot(slotNumber):GetName() == "item_tango" or
+    --             bot:GetItemInSlot(slotNumber):GetName() == "item_ironwood_tree" then
+    --             print("Bot selling junk item, bot " .. bot:GetPlayerID() ..
+    --                       " selling.")
+    --             bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
+    --         end
+    --     end
+    -- end
 
     if DotaTime() < itemPurchaseThinkMoment then
         return
