@@ -7,6 +7,7 @@ local DIRE_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET2)
 
 local currentItemToPurchase
 local itemPurchaseThinkMoment = -90
+local sellGarbageItemThinkMoment = -90
 
 -- I copied this TablePrint method from stackoverflow, it's used to print the contents of a table(/list). url: https://stackoverflow.com/questions/41942289/display-contents-of-tables-in-lua
 function TablePrint(tbl, indent)
@@ -173,8 +174,12 @@ function PurchaseItem(itemPurchaseList)
                                     "Bot purchasing item from secret shop, bot " ..
                                         bot:GetPlayerID() .. " purchasing: " ..
                                         currentItemNameInItemPurchaseList .. ".")
-                                bot:ActionImmediate_PurchaseItem(
-                                    currentItemNameInItemPurchaseList)
+                                if bot:ActionImmediate_PurchaseItem(
+                                    currentItemNameInItemPurchaseList) ==
+                                    PURCHASE_ITEM_SUCCESS then
+                                    bot:ActionImmediate_Courier(courier,
+                                                                COURIER_ACTION_TRANSFER_ITEMS)
+                                end
                                 return
                             elseif bot:DistanceFromSecretShop() <= 500 then
                                 print("Bot moving to secret shop, bot " ..
@@ -221,8 +226,12 @@ function PurchaseItem(itemPurchaseList)
                             print("Bot purchasing item from base, bot " ..
                                       bot:GetPlayerID() .. " purchasing: " ..
                                       currentItemNameInItemPurchaseList .. ".")
-                            bot:ActionImmediate_PurchaseItem(
-                                currentItemNameInItemPurchaseList)
+                            if bot:ActionImmediate_PurchaseItem(
+                                currentItemNameInItemPurchaseList) ==
+                                PURCHASE_ITEM_SUCCESS then
+                                bot:ActionImmediate_Courier(courier,
+                                                            COURIER_ACTION_TRANSFER_ITEMS)
+                            end
 
                             return
                         end
@@ -239,6 +248,16 @@ end
 
 -- Implement ItemPurchaseThink() to override decisionmaking around item purchasing.
 function ItemPurchaseThink()
+    if DotaTime() >= sellGarbageItemThinkMoment then
+        sellGarbageItemThinkMoment = sellGarbageItemThinkMoment + 0.1
+        for slotNumber = 9, 14, 1 do
+            local handleOfItemInTheStack = bot:GetItemInSlot(slotNumber)
+            if handleOfItemInTheStack then
+                bot:ActionImmediate_SellItem(handleOfItemInTheStack)
+            end
+        end
+    end
+
     if DotaTime() < itemPurchaseThinkMoment then
         return
     else
