@@ -1,4 +1,3 @@
--- TODO Double item handling.
 -- TODO Sell scepter or scepter components after having roshan scepter.
 local bot = GetBot()
 local courier = nil
