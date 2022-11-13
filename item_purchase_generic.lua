@@ -246,31 +246,133 @@ function PurchaseItem(itemPurchaseList)
     end
 end
 
+local realTimeRecordList = {0, 0, 0}
+local isGamePausedList = {false, false, false}
+local sellAfterUnpausedThinkMoment = RealTime()
+local botStashItemCountList = {0, 0, 0}
+local botBodyItemCountList = {0, 0, 0}
+local botCourierItemCountList = {0, 0, 0}
+local botStashItemCountBeforePause = 0
+local botBodyItemCountBeforePause = 0
+local botCourierItemCountBeforePause = 0
+
+function RecordRealTime(realTimeRecordList)
+    realTimeRecordList[1] = realTimeRecordList[2]
+    realTimeRecordList[2] = realTimeRecordList[3]
+    realTimeRecordList[3] = RealTime()
+end
+
+function RecordIfGameIsUnpaused(isGamePausedList)
+    if  realTimeRecordList[3] - realTimeRecordList[2] > 0.3 then
+        isGamePausedList[1] = isGamePausedList[2]
+        isGamePausedList[2] = isGamePausedList[3]
+        isGamePausedList[3] = true
+    else
+        isGamePausedList[1] = isGamePausedList[2]
+        isGamePausedList[2] = isGamePausedList[3]
+        isGamePausedList[3] = false
+    end
+end
+
+function RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
+                            botCourierItemCountList)
+    local botStashItemCount = 0
+    for i = 9, 14, 1 do
+        if bot:GetItemInSlot(i) then
+            botStashItemCount = botStashItemCount + 1
+        else
+            break
+        end
+    end
+    botStashItemCountList[1] = botStashItemCountList[2]
+    botStashItemCountList[2] = botStashItemCountList[3]
+    botStashItemCountList[3] = botStashItemCount
+
+    local botBodyItemCount = 0
+    for i = 0, 8, 1 do
+        if bot:GetItemInSlot(i) then
+            botBodyItemCount = botBodyItemCount + 1
+        else
+            break
+        end
+    end
+    botBodyItemCountList[1] = botBodyItemCountList[2]
+    botBodyItemCountList[2] = botBodyItemCountList[3]
+    botBodyItemCountList[3] = botBodyItemCount
+
+    local botCourierItemCount = 0
+    for i = 0, 8, 1 do
+        if courier:GetItemInSlot(i) then
+            botCourierItemCount = botCourierItemCount + 1
+        else
+            break
+        end
+    end
+    botCourierItemCountList[1] = botCourierItemCountList[2]
+    botCourierItemCountList[2] = botCourierItemCountList[3]
+    botCourierItemCountList[3] = botCourierItemCount
+end
+
+function SellingItemsAfterTheGameIsUnpaused()
+    print(TablePrint(isGamePausedList))
+    print(TablePrint(realTimeRecordList))
+    if (isGamePausedList[1] == false and isGamePausedList[2] == false and
+        isGamePausedList[3] == true) then
+        botStashItemCountBeforePause = botStashItemCountList[1]
+        botBodyItemCountBeforePause = botBodyItemCountList[1]
+        botCourierItemCountBeforePause = botCourierItemCountList[1]
+    end
+    if (isGamePausedList[1] == true and isGamePausedList[2] == true and
+        isGamePausedList[3] == false) or
+        (isGamePausedList[1] == true and isGamePausedList[2] == false and
+            isGamePausedList[3] == false) then
+                print("Unpaused!...")
+        if botStashItemCountBeforePause < 6 then
+            for botStashSlotIndex = 9 + botStashItemCountBeforePause, 14, 1 do
+                print("selling...")
+                bot:ActionImmediate_SellItem(
+                    bot:GetItemInSlot(botStashSlotIndex))
+            end
+        end
+        if botBodyItemCountBeforePause + botStashItemCountBeforePause < 9 then
+            for botBodySlotIndex = 0 + botBodyItemCountBeforePause +
+                botStashItemCountBeforePause, 8, 1 do
+                print("selling...")
+                bot:ActionImmediate_SellItem(bot:GetItemInSlot(botBodySlotIndex))
+            end
+        end
+        if botCourierItemCountBeforePause + botStashItemCountBeforePause < 9 then
+            for botCourierSlotIndex = 0 + botCourierItemCountBeforePause +
+                botStashItemCountBeforePause, 8, 1 do
+                print("selling...")
+                courier:ActionImmediate_SellItem(
+                    courier:GetItemInSlot(botCourierSlotIndex))
+            end
+        end
+        for botCourierSlotIndex = 0, 8, 1 do
+            print("selling...")
+            courier:ActionImmediate_SellItem(
+                courier:GetItemInSlot(botCourierSlotIndex))
+        end
+    end
+end
+
 -- Implement ItemPurchaseThink() to override decisionmaking around item purchasing.
 function ItemPurchaseThink()
-    -- for slotNumber = 9, 14, 1 do
-    --     if bot:GetItemInSlot(slotNumber) then
-    --         print("Bot selling item from stack, bot " .. bot:GetPlayerID() ..
-    --                   " selling.")
-    --         bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
-    --     end
-    -- end
-    -- for slotNumber = 0, 14, 1 do
-    --     if bot:GetItemInSlot(slotNumber) then
-    --         if bot:GetItemInSlot(slotNumber):GetName() == "item_tango" or
-    --             bot:GetItemInSlot(slotNumber):GetName() == "item_ironwood_tree" then
-    --             print("Bot selling junk item, bot " .. bot:GetPlayerID() ..
-    --                       " selling.")
-    --             bot:ActionImmediate_SellItem(bot:GetItemInSlot(slotNumber))
-    --         end
-    --     end
-    -- end
-
     if DotaTime() < itemPurchaseThinkMoment then
         return
     else
         if courier == nil then courier = GetCourier(bot:GetPlayerID()) end
         itemPurchaseThinkMoment = itemPurchaseThinkMoment + 0.5
         PurchaseItem(itemPurchaseListSkeletonKing)
+    end
+
+    if RealTime() > sellAfterUnpausedThinkMoment then
+        sellAfterUnpausedThinkMoment = sellAfterUnpausedThinkMoment + 0.1
+        RecordRealTime(realTimeRecordList)
+        RecordIfGameIsUnpaused(isGamePausedList)
+        RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
+                           botCourierItemCountList)
+        SellingItemsAfterTheGameIsUnpaused()
     end
 end
