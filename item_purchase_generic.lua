@@ -263,7 +263,7 @@ function RecordRealTime(realTimeRecordList)
 end
 
 function RecordIfGameIsUnpaused(isGamePausedList)
-    if  realTimeRecordList[3] - realTimeRecordList[2] > 0.3 then
+    if realTimeRecordList[3] - realTimeRecordList[2] > 3.5 then
         isGamePausedList[1] = isGamePausedList[2]
         isGamePausedList[2] = isGamePausedList[3]
         isGamePausedList[3] = true
@@ -314,45 +314,44 @@ function RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
 end
 
 function SellingItemsAfterTheGameIsUnpaused()
-    print(TablePrint(isGamePausedList))
-    print(TablePrint(realTimeRecordList))
     if (isGamePausedList[1] == false and isGamePausedList[2] == false and
         isGamePausedList[3] == true) then
         botStashItemCountBeforePause = botStashItemCountList[1]
         botBodyItemCountBeforePause = botBodyItemCountList[1]
         botCourierItemCountBeforePause = botCourierItemCountList[1]
     end
-    if (isGamePausedList[1] == true and isGamePausedList[2] == true and
-        isGamePausedList[3] == false) or
-        (isGamePausedList[1] == true and isGamePausedList[2] == false and
-            isGamePausedList[3] == false) then
-                print("Unpaused!...")
+    if (isGamePausedList[2] == true and isGamePausedList[3] == false) or
+        (isGamePausedList[1] == true and isGamePausedList[3] == false) then
+        print("Unpaused!...")
         if botStashItemCountBeforePause < 6 then
             for botStashSlotIndex = 9 + botStashItemCountBeforePause, 14, 1 do
                 print("selling...")
-                bot:ActionImmediate_SellItem(
-                    bot:GetItemInSlot(botStashSlotIndex))
+                if bot:GetItemInSlot(botStashSlotIndex) then
+                    bot:ActionImmediate_SellItem(bot:GetItemInSlot(
+                                                     botStashSlotIndex))
+                end
             end
         end
         if botBodyItemCountBeforePause + botStashItemCountBeforePause < 9 then
             for botBodySlotIndex = 0 + botBodyItemCountBeforePause +
                 botStashItemCountBeforePause, 8, 1 do
                 print("selling...")
-                bot:ActionImmediate_SellItem(bot:GetItemInSlot(botBodySlotIndex))
+                if bot:GetItemInSlot(botBodySlotIndex) then
+                    bot:ActionImmediate_SellItem(bot:GetItemInSlot(
+                                                     botBodySlotIndex))
+                end
             end
         end
         if botCourierItemCountBeforePause + botStashItemCountBeforePause < 9 then
             for botCourierSlotIndex = 0 + botCourierItemCountBeforePause +
                 botStashItemCountBeforePause, 8, 1 do
                 print("selling...")
-                courier:ActionImmediate_SellItem(
-                    courier:GetItemInSlot(botCourierSlotIndex))
+                if courier:GetItemInSlot(botCourierSlotIndex) then
+                    print("courier selling: "..courier:GetItemInSlot(botCourierSlotIndex):GetName())
+                    courier:ActionImmediate_SellItem(
+                        courier:GetItemInSlot(botCourierSlotIndex))
+                end
             end
-        end
-        for botCourierSlotIndex = 0, 8, 1 do
-            print("selling...")
-            courier:ActionImmediate_SellItem(
-                courier:GetItemInSlot(botCourierSlotIndex))
         end
     end
 end
@@ -368,11 +367,20 @@ function ItemPurchaseThink()
     end
 
     if RealTime() > sellAfterUnpausedThinkMoment then
-        sellAfterUnpausedThinkMoment = sellAfterUnpausedThinkMoment + 0.1
+        sellAfterUnpausedThinkMoment = RealTime() + 0.5
+        print(sellAfterUnpausedThinkMoment)
+        print(TablePrint(isGamePausedList))
+        print(TablePrint(realTimeRecordList))
         RecordRealTime(realTimeRecordList)
         RecordIfGameIsUnpaused(isGamePausedList)
         RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
                            botCourierItemCountList)
+        print(TablePrint(botStashItemCountList))
+        print(TablePrint(botBodyItemCountList))
+        print(TablePrint(botCourierItemCountList))
         SellingItemsAfterTheGameIsUnpaused()
+        print(botStashItemCountBeforePause)
+        print(botBodyItemCountBeforePause)
+        print(botCourierItemCountBeforePause)
     end
 end
