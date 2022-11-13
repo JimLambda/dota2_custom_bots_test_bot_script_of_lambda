@@ -347,9 +347,12 @@ function SellingItemsAfterTheGameIsUnpaused()
                 botStashItemCountBeforePause, 8, 1 do
                 print("selling...")
                 if courier:GetItemInSlot(botCourierSlotIndex) then
-                    print("courier selling: "..courier:GetItemInSlot(botCourierSlotIndex):GetName())
-                    courier:ActionImmediate_SellItem(
-                        courier:GetItemInSlot(botCourierSlotIndex))
+                    print("courier returning: " ..
+                              courier:GetItemInSlot(botCourierSlotIndex)
+                                  :GetName())
+                    bot:ActionImmediate_Courier(courier, COURIER_ACTION_RETURN)
+                    -- courier:ActionImmediate_SellItem(
+                    --     courier:GetItemInSlot(botCourierSlotIndex))
                 end
             end
         end
