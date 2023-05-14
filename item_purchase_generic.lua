@@ -54,8 +54,8 @@ end
 
 -- Item purchase lists for npc_dota_hero_skeleton_king.
 local itemPurchaseListSkeletonKing = {
-    "item_boots", "item_crimson_guard", "item_assault", "item_heart",
-    "item_aeon_disk", "item_ultimate_scepter", "item_aghanims_shard",
+    "item_boots", "item_crimson_guard", "item_aghanims_shard", "item_assault",
+    "item_heart", "item_aeon_disk", "item_ultimate_scepter",
     "item_travel_boots", "item_ultimate_scepter_2", "item_sphere",
     "item_travel_boots_2", "item_moon_shard"
 }
@@ -369,21 +369,21 @@ function ItemPurchaseThink()
         PurchaseItem(itemPurchaseListSkeletonKing)
     end
 
-    if RealTime() > sellAfterUnpausedThinkMoment then
-        sellAfterUnpausedThinkMoment = RealTime() + 0.5
-        print(sellAfterUnpausedThinkMoment)
-        print(TablePrint(isGamePausedList))
-        print(TablePrint(realTimeRecordList))
-        RecordRealTime(realTimeRecordList)
-        RecordIfGameIsUnpaused(isGamePausedList)
-        RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
-                           botCourierItemCountList)
-        print(TablePrint(botStashItemCountList))
-        print(TablePrint(botBodyItemCountList))
-        print(TablePrint(botCourierItemCountList))
-        SellingItemsAfterTheGameIsUnpaused()
-        print(botStashItemCountBeforePause)
-        print(botBodyItemCountBeforePause)
-        print(botCourierItemCountBeforePause)
-    end
+    -- if RealTime() > sellAfterUnpausedThinkMoment then
+    --     sellAfterUnpausedThinkMoment = RealTime() + 0.5
+    --     print(sellAfterUnpausedThinkMoment)
+    --     print(TablePrint(isGamePausedList))
+    --     print(TablePrint(realTimeRecordList))
+    --     RecordRealTime(realTimeRecordList)
+    --     RecordIfGameIsUnpaused(isGamePausedList)
+    --     RecordBotItemLists(botStashItemCountList, botBodyItemCountList,
+    --                        botCourierItemCountList)
+    --     print(TablePrint(botStashItemCountList))
+    --     print(TablePrint(botBodyItemCountList))
+    --     print(TablePrint(botCourierItemCountList))
+    --     SellingItemsAfterTheGameIsUnpaused()
+    --     print(botStashItemCountBeforePause)
+    --     print(botBodyItemCountBeforePause)
+    --     print(botCourierItemCountBeforePause)
+    -- end
 end
