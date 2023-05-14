@@ -202,6 +202,7 @@ function PurchaseItem(itemPurchaseList)
                                                 "'s courier purchasing: " ..
                                                 currentItemNameInItemPurchaseList ..
                                                 ".")
+                                                courier = GetCourier(bot:GetPlayerID())
                                         if courier:ActionImmediate_PurchaseItem(
                                             currentItemNameInItemPurchaseList) ==
                                             PURCHASE_ITEM_SUCCESS then
@@ -214,6 +215,7 @@ function PurchaseItem(itemPurchaseList)
                                             "Courier moving to secret shop, bot " ..
                                                 bot:GetPlayerID() ..
                                                 "'s courier moving to secret shop.")
+                                                courier = GetCourier(bot:GetPlayerID())
                                         bot:ActionImmediate_Courier(courier,
                                                                     COURIER_ACTION_SECRET_SHOP)
                                         return
