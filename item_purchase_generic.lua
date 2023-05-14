@@ -100,7 +100,11 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
                    0)
     end
     if itemNameToCheck == 'item_aghanims_shard' then
-        print("bot:FindAllModifiers(): " .. bot:FindAllModifiers())
+        local allModifiersList = bot:GetModifierList()
+        for k, v in ipairs(allModifiersList) do
+            print(k .. v)
+        end
+        -- print("bot:FindAllModifiers(): " .. allModifiersList)
     end
 
     if isItDoubleItem == true then
