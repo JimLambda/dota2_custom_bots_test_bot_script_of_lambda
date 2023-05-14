@@ -8,6 +8,7 @@ local DIRE_SECRET_SHOP = GetShopLocation(GetTeam(), SHOP_SECRET2)
 local currentItemToPurchase
 local itemPurchaseThinkMoment = -90
 local sellGarbageItemThinkMoment = -90
+local hasPurchasedAghanimsShard = false
 
 -- I copied this TablePrint method from stackoverflow, it's used to print the contents of a table(/list). url: https://stackoverflow.com/questions/41942289/display-contents-of-tables-in-lua
 function TablePrint(tbl, indent)
@@ -54,8 +55,8 @@ end
 
 -- Item purchase lists for npc_dota_hero_skeleton_king.
 local itemPurchaseListSkeletonKing = {
-    "item_boots", "item_crimson_guard", "item_aghanims_shard", "item_assault",
-    "item_heart", "item_aeon_disk", "item_ultimate_scepter",
+    "item_boots", "item_crimson_guard", "item_assault", "item_heart",
+    "item_aghanims_shard", "item_aeon_disk", "item_ultimate_scepter",
     "item_travel_boots", "item_ultimate_scepter_2", "item_sphere",
     "item_travel_boots_2", "item_moon_shard"
 }
@@ -100,10 +101,11 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
                    0)
     end
     if itemNameToCheck == 'item_aghanims_shard' then
-        local allModifiersList = bot:GetModifierList()
-        for k, v in ipairs(allModifiersList) do
-            print(k .. v)
-        end
+        if hasPurchasedAghanimsShard then return true end
+        -- local allModifiersList = bot:GetModifierList()
+        -- for k, v in ipairs(allModifiersList) do
+        --     print(k .. v)
+        -- end
         -- print("bot:FindAllModifiers(): " .. allModifiersList)
     end
 
@@ -206,7 +208,7 @@ function PurchaseItem(itemPurchaseList)
                                                 "'s courier purchasing: " ..
                                                 currentItemNameInItemPurchaseList ..
                                                 ".")
-                                                courier = GetCourier(bot:GetPlayerID())
+                                        courier = GetCourier(bot:GetPlayerID())
                                         if courier:ActionImmediate_PurchaseItem(
                                             currentItemNameInItemPurchaseList) ==
                                             PURCHASE_ITEM_SUCCESS then
@@ -219,7 +221,7 @@ function PurchaseItem(itemPurchaseList)
                                             "Courier moving to secret shop, bot " ..
                                                 bot:GetPlayerID() ..
                                                 "'s courier moving to secret shop.")
-                                                courier = GetCourier(bot:GetPlayerID())
+                                        courier = GetCourier(bot:GetPlayerID())
                                         bot:ActionImmediate_Courier(courier,
                                                                     COURIER_ACTION_SECRET_SHOP)
                                         return
@@ -240,6 +242,10 @@ function PurchaseItem(itemPurchaseList)
                                 PURCHASE_ITEM_SUCCESS then
                                 bot:ActionImmediate_Courier(courier,
                                                             COURIER_ACTION_TRANSFER_ITEMS)
+                                if currentItemNameInItemPurchaseList ==
+                                    'item_aghanims_shard' then
+                                    hasPurchasedAghanimsShard = true
+                                end
                             end
 
                             return
