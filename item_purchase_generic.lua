@@ -99,6 +99,9 @@ function CheckIfTheBotAlreadyHasThisItem(bot, courier, itemNameToCheck,
         return (bot:HasScepter() and bot:FindItemSlot('item_ultimate_scepter') <
                    0)
     end
+    if itemNameToCheck == 'item_aghanims_shard' then
+        print("bot:FindAllModifiers(): " .. bot:FindAllModifiers())
+    end
 
     if isItDoubleItem == true then
         local tableOfAllItemsTheBotHas = {}
